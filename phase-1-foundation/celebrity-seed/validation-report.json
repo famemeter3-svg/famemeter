@@ -1,0 +1,13 @@
+{
+  "total_records": 100,
+  "valid_records": 100,
+  "errors": [],
+  "warnings": [],
+  "details": {
+    "metadata_records": 100,
+    "scraper_records": 0,
+    "total_valid": 100,
+    "total_errors": 0,
+    "total_warnings": 0
+  }
+}

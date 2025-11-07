@@ -1,0 +1,80 @@
+{
+  "TableName": "celebrity-database",
+  "AttributeDefinitions": [
+    {
+      "AttributeName": "celebrity_id",
+      "AttributeType": "S"
+    },
+    {
+      "AttributeName": "source_type#timestamp",
+      "AttributeType": "S"
+    },
+    {
+      "AttributeName": "name",
+      "AttributeType": "S"
+    },
+    {
+      "AttributeName": "source",
+      "AttributeType": "S"
+    },
+    {
+      "AttributeName": "timestamp",
+      "AttributeType": "S"
+    }
+  ],
+  "KeySchema": [
+    {
+      "AttributeName": "celebrity_id",
+      "KeyType": "HASH"
+    },
+    {
+      "AttributeName": "source_type#timestamp",
+      "KeyType": "RANGE"
+    }
+  ],
+  "BillingMode": "PAY_PER_REQUEST",
+  "StreamSpecification": {
+    "StreamEnabled": true,
+    "StreamViewType": "NEW_AND_OLD_IMAGES"
+  },
+  "GlobalSecondaryIndexes": [
+    {
+      "IndexName": "name-index",
+      "KeySchema": [
+        {
+          "AttributeName": "name",
+          "KeyType": "HASH"
+        }
+      ],
+      "Projection": {
+        "ProjectionType": "ALL"
+      }
+    },
+    {
+      "IndexName": "source-index",
+      "KeySchema": [
+        {
+          "AttributeName": "source",
+          "KeyType": "HASH"
+        },
+        {
+          "AttributeName": "timestamp",
+          "KeyType": "RANGE"
+        }
+      ],
+      "Projection": {
+        "ProjectionType": "ALL"
+      }
+    }
+  ],
+  "Tags": [
+    {
+      "Key": "Project",
+      "Value": "celebrity-database"
+    },
+    {
+      "Key": "Phase",
+      "Value": "foundation"
+    }
+  ]
+}

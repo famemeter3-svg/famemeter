@@ -1,0 +1,702 @@
+[
+  {
+    "celebrity_id": "celeb_001",
+    "name": "周潤發",
+    "birth_date": "1955-05-18",
+    "nationality": "台灣",
+    "occupation": ["演員", "製片人"]
+  },
+  {
+    "celebrity_id": "celeb_002",
+    "name": "梁詠琪",
+    "birth_date": "1976-12-20",
+    "nationality": "台灣",
+    "occupation": ["歌手", "演員", "詞曲作家"]
+  },
+  {
+    "celebrity_id": "celeb_003",
+    "name": "金城武",
+    "birth_date": "1973-11-11",
+    "nationality": "台灣日本混血",
+    "occupation": ["演員", "歌手", "模特"]
+  },
+  {
+    "celebrity_id": "celeb_004",
+    "name": "劉若英",
+    "birth_date": "1978-06-01",
+    "nationality": "台灣",
+    "occupation": ["歌手", "演員", "詞曲作家"]
+  },
+  {
+    "celebrity_id": "celeb_005",
+    "name": "徐熙媛",
+    "birth_date": "1978-10-06",
+    "nationality": "台灣",
+    "occupation": ["演員", "歌手", "企業家"]
+  },
+  {
+    "celebrity_id": "celeb_006",
+    "name": "朱孝天",
+    "birth_date": "1979-10-20",
+    "nationality": "台灣",
+    "occupation": ["歌手", "演員", "舞者"]
+  },
+  {
+    "celebrity_id": "celeb_007",
+    "name": "徐熙娣",
+    "birth_date": "1975-03-19",
+    "nationality": "台灣",
+    "occupation": ["演員", "歌手", "主持人"]
+  },
+  {
+    "celebrity_id": "celeb_008",
+    "name": "顏值",
+    "birth_date": "1989-11-20",
+    "nationality": "台灣",
+    "occupation": ["演員", "歌手", "模特"]
+  },
+  {
+    "celebrity_id": "celeb_009",
+    "name": "蔡依林",
+    "birth_date": "1981-09-15",
+    "nationality": "台灣",
+    "occupation": ["歌手", "演員", "製片人"]
+  },
+  {
+    "celebrity_id": "celeb_010",
+    "name": "羅志祥",
+    "birth_date": "1979-07-10",
+    "nationality": "台灣",
+    "occupation": ["歌手", "舞者", "主持人"]
+  },
+  {
+    "celebrity_id": "celeb_011",
+    "name": "蔡卓妍",
+    "birth_date": "1982-06-14",
+    "nationality": "台灣香港混血",
+    "occupation": ["歌手", "演員", "舞者"]
+  },
+  {
+    "celebrity_id": "celeb_012",
+    "name": "何炅",
+    "birth_date": "1969-07-04",
+    "nationality": "台灣",
+    "occupation": ["歌手", "演員", "製片人"]
+  },
+  {
+    "celebrity_id": "celeb_013",
+    "name": "舒淇",
+    "birth_date": "1976-04-16",
+    "nationality": "台灣",
+    "occupation": ["演員", "模特", "歌手"]
+  },
+  {
+    "celebrity_id": "celeb_014",
+    "name": "譚蕊",
+    "birth_date": "1978-08-24",
+    "nationality": "台灣",
+    "occupation": ["歌手", "演員", "喜劇演員"]
+  },
+  {
+    "celebrity_id": "celeb_015",
+    "name": "楊丞琳",
+    "birth_date": "1982-06-16",
+    "nationality": "台灣",
+    "occupation": ["演員", "歌手", "模特"]
+  },
+  {
+    "celebrity_id": "celeb_016",
+    "name": "鄭鈞浩",
+    "birth_date": "1981-10-14",
+    "nationality": "台灣",
+    "occupation": ["演員", "歌手", "模特"]
+  },
+  {
+    "celebrity_id": "celeb_017",
+    "name": "林依晨",
+    "birth_date": "1985-09-25",
+    "nationality": "台灣",
+    "occupation": ["演員", "歌手", "模特"]
+  },
+  {
+    "celebrity_id": "celeb_018",
+    "name": "邱澤",
+    "birth_date": "1981-10-17",
+    "nationality": "台灣",
+    "occupation": ["演員", "模特", "製片人"]
+  },
+  {
+    "celebrity_id": "celeb_019",
+    "name": "徐懷鈺",
+    "birth_date": "1981-07-25",
+    "nationality": "台灣",
+    "occupation": ["演員", "模特", "主持人"]
+  },
+  {
+    "celebrity_id": "celeb_020",
+    "name": "阮經天",
+    "birth_date": "1983-01-06",
+    "nationality": "台灣",
+    "occupation": ["演員", "模特", "歌手"]
+  },
+  {
+    "celebrity_id": "celeb_021",
+    "name": "賴雨蕎",
+    "birth_date": "1982-04-17",
+    "nationality": "台灣",
+    "occupation": ["演員", "歌手", "主持人"]
+  },
+  {
+    "celebrity_id": "celeb_022",
+    "name": "言承旭",
+    "birth_date": "1977-01-01",
+    "nationality": "台灣",
+    "occupation": ["演員", "歌手", "模特"]
+  },
+  {
+    "celebrity_id": "celeb_023",
+    "name": "伍佰",
+    "birth_date": "1968-09-07",
+    "nationality": "台灣",
+    "occupation": ["歌手", "音樂家", "詞曲作家"]
+  },
+  {
+    "celebrity_id": "celeb_024",
+    "name": "謝怡芬",
+    "birth_date": "1980-03-04",
+    "nationality": "台灣",
+    "occupation": ["演員", "歌手", "模特"]
+  },
+  {
+    "celebrity_id": "celeb_025",
+    "name": "吳彥祖",
+    "birth_date": "1974-09-30",
+    "nationality": "台灣美國混血",
+    "occupation": ["演員", "製片人", "導演"]
+  },
+  {
+    "celebrity_id": "celeb_026",
+    "name": "許維恩",
+    "birth_date": "1985-10-20",
+    "nationality": "台灣",
+    "occupation": ["歌手", "演員", "模特"]
+  },
+  {
+    "celebrity_id": "celeb_027",
+    "name": "趙又廷",
+    "birth_date": "1979-12-08",
+    "nationality": "台灣",
+    "occupation": ["演員", "模特", "歌手"]
+  },
+  {
+    "celebrity_id": "celeb_028",
+    "name": "鄧紫棋",
+    "birth_date": "1983-07-15",
+    "nationality": "台灣",
+    "occupation": ["演員", "歌手", "主持人"]
+  },
+  {
+    "celebrity_id": "celeb_029",
+    "name": "陳奕迅",
+    "birth_date": "1980-02-13",
+    "nationality": "台灣",
+    "occupation": ["歌手", "演員", "詞曲作家"]
+  },
+  {
+    "celebrity_id": "celeb_030",
+    "name": "陳綺貞",
+    "birth_date": "1988-05-22",
+    "nationality": "台灣",
+    "occupation": ["歌手", "演員", "模特"]
+  },
+  {
+    "celebrity_id": "celeb_031",
+    "name": "周渝民",
+    "birth_date": "1981-07-05",
+    "nationality": "台灣",
+    "occupation": ["演員", "歌手", "模特"]
+  },
+  {
+    "celebrity_id": "celeb_032",
+    "name": "關常君",
+    "birth_date": "1986-03-28",
+    "nationality": "台灣",
+    "occupation": ["歌手", "演員", "舞者"]
+  },
+  {
+    "celebrity_id": "celeb_033",
+    "name": "楊丞琳",
+    "birth_date": "1982-06-16",
+    "nationality": "台灣",
+    "occupation": ["演員", "歌手", "模特"]
+  },
+  {
+    "celebrity_id": "celeb_034",
+    "name": "陶晶瑩",
+    "birth_date": "1979-11-10",
+    "nationality": "台灣",
+    "occupation": ["歌手", "演員", "喜劇演員"]
+  },
+  {
+    "celebrity_id": "celeb_035",
+    "name": "陳昊森",
+    "birth_date": "1985-01-08",
+    "nationality": "台灣",
+    "occupation": ["歌手", "演員", "模特"]
+  },
+  {
+    "celebrity_id": "celeb_036",
+    "name": "陳昱拓",
+    "birth_date": "1960-05-14",
+    "nationality": "台灣",
+    "occupation": ["歌手", "音樂家", "詞曲作家"]
+  },
+  {
+    "celebrity_id": "celeb_037",
+    "name": "楊丹",
+    "birth_date": "1982-02-07",
+    "nationality": "台灣",
+    "occupation": ["演員", "歌手", "主持人"]
+  },
+  {
+    "celebrity_id": "celeb_038",
+    "name": "顏卓燁",
+    "birth_date": "1989-08-16",
+    "nationality": "台灣",
+    "occupation": ["歌手", "演員", "舞者"]
+  },
+  {
+    "celebrity_id": "celeb_039",
+    "name": "張鈞甯",
+    "birth_date": "1982-04-26",
+    "nationality": "台灣",
+    "occupation": ["演員", "模特", "製片人"]
+  },
+  {
+    "celebrity_id": "celeb_040",
+    "name": "胡宇威",
+    "birth_date": "1979-02-14",
+    "nationality": "台灣",
+    "occupation": ["演員", "歌手", "模特"]
+  },
+  {
+    "celebrity_id": "celeb_041",
+    "name": "吳欣恩",
+    "birth_date": "1984-04-27",
+    "nationality": "台灣",
+    "occupation": ["演員", "歌手", "模特"]
+  },
+  {
+    "celebrity_id": "celeb_042",
+    "name": "劉奕兒",
+    "birth_date": "1990-03-19",
+    "nationality": "台灣",
+    "occupation": ["演員", "模特", "歌手"]
+  },
+  {
+    "celebrity_id": "celeb_043",
+    "name": "林志玲",
+    "birth_date": "1978-11-03",
+    "nationality": "台灣",
+    "occupation": ["模特", "演員", "主持人"]
+  },
+  {
+    "celebrity_id": "celeb_044",
+    "name": "楊紫",
+    "birth_date": "1985-09-08",
+    "nationality": "台灣",
+    "occupation": ["演員", "歌手", "模特"]
+  },
+  {
+    "celebrity_id": "celeb_045",
+    "name": "明道",
+    "birth_date": "1987-06-02",
+    "nationality": "台灣",
+    "occupation": ["演員", "歌手", "舞者"]
+  },
+  {
+    "celebrity_id": "celeb_046",
+    "name": "李晟",
+    "birth_date": "1980-12-25",
+    "nationality": "台灣",
+    "occupation": ["演員", "模特", "製片人"]
+  },
+  {
+    "celebrity_id": "celeb_047",
+    "name": "高以翔",
+    "birth_date": "1981-10-22",
+    "nationality": "台灣",
+    "occupation": ["演員", "模特", "主持人"]
+  },
+  {
+    "celebrity_id": "celeb_048",
+    "name": "方芳",
+    "birth_date": "1982-07-19",
+    "nationality": "台灣",
+    "occupation": ["演員", "歌手", "模特"]
+  },
+  {
+    "celebrity_id": "celeb_049",
+    "name": "陳元翰",
+    "birth_date": "1986-10-31",
+    "nationality": "台灣",
+    "occupation": ["歌手", "演員", "詞曲作家"]
+  },
+  {
+    "celebrity_id": "celeb_050",
+    "name": "阿月",
+    "birth_date": "1979-05-15",
+    "nationality": "台灣",
+    "occupation": ["歌手", "音樂家", "作曲家"]
+  },
+  {
+    "celebrity_id": "celeb_051",
+    "name": "彤彤",
+    "birth_date": "1987-09-12",
+    "nationality": "台灣",
+    "occupation": ["演員", "歌手", "模特"]
+  },
+  {
+    "celebrity_id": "celeb_052",
+    "name": "邱天",
+    "birth_date": "1989-11-05",
+    "nationality": "台灣",
+    "occupation": ["演員", "歌手", "模特"]
+  },
+  {
+    "celebrity_id": "celeb_053",
+    "name": "溫明娜",
+    "birth_date": "1963-11-20",
+    "nationality": "台灣美國混血",
+    "occupation": ["演員", "配音演員", "製片人"]
+  },
+  {
+    "celebrity_id": "celeb_054",
+    "name": "吳敏霓",
+    "birth_date": "1983-08-18",
+    "nationality": "台灣",
+    "occupation": ["演員", "歌手", "模特"]
+  },
+  {
+    "celebrity_id": "celeb_055",
+    "name": "陳榮宗",
+    "birth_date": "1980-04-09",
+    "nationality": "台灣",
+    "occupation": ["歌手", "演員", "舞者"]
+  },
+  {
+    "celebrity_id": "celeb_056",
+    "name": "陳怡蒨",
+    "birth_date": "1984-02-28",
+    "nationality": "台灣",
+    "occupation": ["演員", "模特", "主持人"]
+  },
+  {
+    "celebrity_id": "celeb_057",
+    "name": "黎明",
+    "birth_date": "1966-12-08",
+    "nationality": "台灣",
+    "occupation": ["演員", "歌手", "製片人"]
+  },
+  {
+    "celebrity_id": "celeb_058",
+    "name": "何紫薇",
+    "birth_date": "1982-10-16",
+    "nationality": "台灣",
+    "occupation": ["演員", "歌手", "模特"]
+  },
+  {
+    "celebrity_id": "celeb_059",
+    "name": "竇唯華",
+    "birth_date": "1979-03-21",
+    "nationality": "台灣",
+    "occupation": ["歌手", "音樂家", "詞曲作家"]
+  },
+  {
+    "celebrity_id": "celeb_060",
+    "name": "關楚昱",
+    "birth_date": "1985-06-11",
+    "nationality": "台灣",
+    "occupation": ["演員", "歌手", "模特"]
+  },
+  {
+    "celebrity_id": "celeb_061",
+    "name": "庾澄慶",
+    "birth_date": "1971-07-14",
+    "nationality": "台灣",
+    "occupation": ["歌手", "演員", "製片人"]
+  },
+  {
+    "celebrity_id": "celeb_062",
+    "name": "莉婭琴容",
+    "birth_date": "1986-12-24",
+    "nationality": "台灣",
+    "occupation": ["演員", "模特", "主持人"]
+  },
+  {
+    "celebrity_id": "celeb_063",
+    "name": "朱孝天",
+    "birth_date": "1979-10-20",
+    "nationality": "台灣",
+    "occupation": ["歌手", "演員", "舞者"]
+  },
+  {
+    "celebrity_id": "celeb_064",
+    "name": "安心亞",
+    "birth_date": "1982-02-23",
+    "nationality": "台灣",
+    "occupation": ["演員", "歌手", "模特"]
+  },
+  {
+    "celebrity_id": "celeb_065",
+    "name": "尼龍陳",
+    "birth_date": "1980-07-18",
+    "nationality": "台灣",
+    "occupation": ["歌手", "詞曲作家", "音樂家"]
+  },
+  {
+    "celebrity_id": "celeb_066",
+    "name": "林溦禾",
+    "birth_date": "1988-01-04",
+    "nationality": "台灣",
+    "occupation": ["演員", "歌手", "模特"]
+  },
+  {
+    "celebrity_id": "celeb_067",
+    "name": "蘇有朋",
+    "birth_date": "1969-07-19",
+    "nationality": "台灣",
+    "occupation": ["演員", "歌手", "製片人"]
+  },
+  {
+    "celebrity_id": "celeb_068",
+    "name": "艾薇琪",
+    "birth_date": "1984-05-30",
+    "nationality": "台灣",
+    "occupation": ["演員", "模特", "主持人"]
+  },
+  {
+    "celebrity_id": "celeb_069",
+    "name": "馬浚偉",
+    "birth_date": "1974-06-11",
+    "nationality": "台灣",
+    "occupation": ["演員", "歌手", "主持人"]
+  },
+  {
+    "celebrity_id": "celeb_070",
+    "name": "丁寧",
+    "birth_date": "1983-09-08",
+    "nationality": "台灣",
+    "occupation": ["演員", "歌手", "模特"]
+  },
+  {
+    "celebrity_id": "celeb_071",
+    "name": "張廷芬",
+    "birth_date": "1981-11-25",
+    "nationality": "台灣",
+    "occupation": ["歌手", "詞曲作家", "音樂家"]
+  },
+  {
+    "celebrity_id": "celeb_072",
+    "name": "薇娜",
+    "birth_date": "1987-04-14",
+    "nationality": "台灣",
+    "occupation": ["演員", "歌手", "模特"]
+  },
+  {
+    "celebrity_id": "celeb_073",
+    "name": "延道",
+    "birth_date": "1970-02-16",
+    "nationality": "台灣",
+    "occupation": ["歌手", "音樂家", "作曲家"]
+  },
+  {
+    "celebrity_id": "celeb_074",
+    "name": "林晓培",
+    "birth_date": "1985-08-22",
+    "nationality": "台灣",
+    "occupation": ["演員", "模特", "主持人"]
+  },
+  {
+    "celebrity_id": "celeb_075",
+    "name": "徐佳瑩",
+    "birth_date": "1979-01-11",
+    "nationality": "台灣",
+    "occupation": ["演員", "歌手", "舞者"]
+  },
+  {
+    "celebrity_id": "celeb_076",
+    "name": "陳燁陳",
+    "birth_date": "1988-03-27",
+    "nationality": "台灣",
+    "occupation": ["演員", "歌手", "模特"]
+  },
+  {
+    "celebrity_id": "celeb_077",
+    "name": "余佰眉",
+    "birth_date": "1972-10-09",
+    "nationality": "台灣",
+    "occupation": ["歌手", "詞曲作家", "音樂家"]
+  },
+  {
+    "celebrity_id": "celeb_078",
+    "name": "劉思慈",
+    "birth_date": "1986-07-19",
+    "nationality": "台灣",
+    "occupation": ["演員", "模特", "製片人"]
+  },
+  {
+    "celebrity_id": "celeb_079",
+    "name": "汪峯",
+    "birth_date": "1975-05-17",
+    "nationality": "台灣",
+    "occupation": ["演員", "歌手", "製片人"]
+  },
+  {
+    "celebrity_id": "celeb_080",
+    "name": "包益民",
+    "birth_date": "1981-12-20",
+    "nationality": "台灣",
+    "occupation": ["演員", "歌手", "模特"]
+  },
+  {
+    "celebrity_id": "celeb_081",
+    "name": "梅艾",
+    "birth_date": "1983-06-13",
+    "nationality": "台灣",
+    "occupation": ["歌手", "詞曲作家", "演員"]
+  },
+  {
+    "celebrity_id": "celeb_082",
+    "name": "陳嘉樺",
+    "birth_date": "1981-06-18",
+    "nationality": "台灣",
+    "occupation": ["歌手", "演員", "舞者"]
+  },
+  {
+    "celebrity_id": "celeb_083",
+    "name": "劉偵璇",
+    "birth_date": "1987-02-09",
+    "nationality": "台灣",
+    "occupation": ["演員", "模特", "主持人"]
+  },
+  {
+    "celebrity_id": "celeb_084",
+    "name": "阮武",
+    "birth_date": "1976-04-05",
+    "nationality": "台灣",
+    "occupation": ["歌手", "音樂家", "作曲家"]
+  },
+  {
+    "celebrity_id": "celeb_085",
+    "name": "格蕾絲",
+    "birth_date": "1989-09-14",
+    "nationality": "台灣",
+    "occupation": ["演員", "歌手", "模特"]
+  },
+  {
+    "celebrity_id": "celeb_086",
+    "name": "陳奏寒",
+    "birth_date": "1982-01-20",
+    "nationality": "台灣",
+    "occupation": ["歌手", "演員", "詞曲作家"]
+  },
+  {
+    "celebrity_id": "celeb_087",
+    "name": "吳又霖",
+    "birth_date": "1985-11-29",
+    "nationality": "台灣",
+    "occupation": ["演員", "模特", "製片人"]
+  },
+  {
+    "celebrity_id": "celeb_088",
+    "name": "古美陳",
+    "birth_date": "1981-08-02",
+    "nationality": "台灣",
+    "occupation": ["演員", "歌手", "模特"]
+  },
+  {
+    "celebrity_id": "celeb_089",
+    "name": "林宥均",
+    "birth_date": "1984-03-15",
+    "nationality": "台灣",
+    "occupation": ["歌手", "詞曲作家", "音樂家"]
+  },
+  {
+    "celebrity_id": "celeb_090",
+    "name": "何媛媛",
+    "birth_date": "1988-07-31",
+    "nationality": "台灣",
+    "occupation": ["演員", "模特", "主持人"]
+  },
+  {
+    "celebrity_id": "celeb_091",
+    "name": "周杰倫",
+    "birth_date": "1974-08-23",
+    "nationality": "台灣",
+    "occupation": ["歌手", "音樂家", "作曲家"]
+  },
+  {
+    "celebrity_id": "celeb_092",
+    "name": "劉璇",
+    "birth_date": "1986-10-12",
+    "nationality": "台灣",
+    "occupation": ["演員", "歌手", "模特"]
+  },
+  {
+    "celebrity_id": "celeb_093",
+    "name": "傑克陳",
+    "birth_date": "1980-09-27",
+    "nationality": "台灣",
+    "occupation": ["演員", "歌手", "製片人"]
+  },
+  {
+    "celebrity_id": "celeb_094",
+    "name": "瑪麗安",
+    "birth_date": "1984-07-22",
+    "nationality": "菲律賓台灣混血",
+    "occupation": ["演員", "模特", "主持人"]
+  },
+  {
+    "celebrity_id": "celeb_095",
+    "name": "詹姆斯",
+    "birth_date": "1977-12-01",
+    "nationality": "台灣",
+    "occupation": ["歌手", "詞曲作家", "音樂家"]
+  },
+  {
+    "celebrity_id": "celeb_096",
+    "name": "塞琳娜",
+    "birth_date": "1987-05-18",
+    "nationality": "台灣",
+    "occupation": ["演員", "歌手", "模特"]
+  },
+  {
+    "celebrity_id": "celeb_097",
+    "name": "阿德里安",
+    "birth_date": "1983-04-28",
+    "nationality": "台灣",
+    "occupation": ["演員", "模特", "製片人"]
+  },
+  {
+    "celebrity_id": "celeb_098",
+    "name": "琥珀",
+    "birth_date": "1988-02-14",
+    "nationality": "台灣",
+    "occupation": ["模特", "演員", "主持人"]
+  },
+  {
+    "celebrity_id": "celeb_099",
+    "name": "文森特",
+    "birth_date": "1981-09-09",
+    "nationality": "台灣",
+    "occupation": ["歌手", "詞曲作家", "演員"]
+  },
+  {
+    "celebrity_id": "celeb_100",
+    "name": "斐婕",
+    "birth_date": "1985-06-08",
+    "nationality": "台灣",
+    "occupation": ["演員", "歌手", "模特"]
+  }
+]
