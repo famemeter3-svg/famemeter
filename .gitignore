@@ -1,0 +1,88 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+.venv/
+venv/
+ENV/
+env/
+
+# Testing
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# AWS SAM/CloudFormation
+.aws-sam/
+samconfig.toml
+sam-tests/
+
+# Build artifacts
+*.zip
+lambda_package.zip
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Node/npm (for frontend)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Project temp files
+*.tmp
+*.temp
+.tmp/
+
+# Build/deployment status files
+DEPLOYMENT_*.txt
+DEPLOYMENT_*.md
+FINAL_DEPLOYMENT_*.md
+IMPLEMENTATION_*.md
+TEST_RESULTS.md
+DATABASE_*.md
+*_COMPLETE.txt
+FILES_CREATED.txt
+PROJECT_STATUS.md
+PROJECT_STRUCTURE.md
+QUICK_START.md
+REFINED_README_SUMMARY.md
+SUMMARY.txt
+AWS_DEPLOYMENT_STATUS.txt
+STAGE_2_PROGRESS.md
+YOUTUBE_SCHEMA_MAPPING.md

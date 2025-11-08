@@ -1,0 +1,229 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Description: Instagram Scraper Lambda Function with Robust Features
+
+Globals:
+  Function:
+    Timeout: 600  # 10 minutes
+    MemorySize: 1024
+    Runtime: python3.13
+    Architectures:
+      - x86_64
+    Environment:
+      Variables:
+        DYNAMODB_TABLE: !Ref DynamoDBTableName
+        AWS_REGION: !Ref AWS::Region
+        LOG_LEVEL: INFO
+        INSTAGRAM_TIMEOUT: '30'
+        INSTAGRAM_MAX_RETRIES: '3'
+
+Parameters:
+  DynamoDBTableName:
+    Type: String
+    Default: celebrity-database
+    Description: DynamoDB table name for storing celebrity data
+
+  InstagramAccountsSecretArn:
+    Type: String
+    Default: ''
+    Description: (Optional) ARN of Secrets Manager secret containing Instagram accounts
+
+Resources:
+  # IAM Role for Lambda function
+  ScraperLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: scraper-policy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              # DynamoDB permissions
+              - Effect: Allow
+                Action:
+                  - dynamodb:PutItem
+                  - dynamodb:GetItem
+                  - dynamodb:UpdateItem
+                  - dynamodb:Query
+                  - dynamodb:Scan
+                Resource: !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${DynamoDBTableName}'
+              # Secrets Manager permissions (optional)
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource: !Sub 'arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:instagram-accounts*'
+              # CloudWatch metrics permissions
+              - Effect: Allow
+                Action:
+                  - cloudwatch:PutMetricData
+                Resource: '*'
+              # CloudWatch logs (already included in AWSLambdaBasicExecutionRole)
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/*'
+
+  # Lambda function for Instagram scraping
+  ScraperFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: scraper-instagram
+      CodeUri: .
+      Handler: lambda_function.lambda_handler
+      Role: !GetAtt ScraperLambdaRole.Arn
+      Runtime: python3.13
+      MemorySize: 1024
+      Timeout: 600
+      EphemeralStorage:
+        Size: 512
+      Environment:
+        Variables:
+          DYNAMODB_TABLE: !Ref DynamoDBTableName
+          INSTAGRAM_ACCOUNTS_SECRET_ARN: !If
+            - HasInstagramSecret
+            - !Ref InstagramAccountsSecretArn
+            - ''
+      Events:
+        # EventBridge trigger (weekly)
+        ScheduledEvent:
+          Type: Schedule
+          Properties:
+            Schedule: cron(0 2 ? * MON *)  # Monday 2 AM UTC
+            Description: Weekly Instagram scraping job
+      Layers:
+        - !Ref DependenciesLayer
+
+  # Lambda Layer for dependencies
+  DependenciesLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: scraper-dependencies
+      Description: Instagram scraper dependencies
+      ContentUri: .
+      CompatibleRuntimes:
+        - python3.13
+
+  # CloudWatch Log Group
+  ScraperLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${ScraperFunction}'
+      RetentionInDays: 30
+
+  # CloudWatch Dashboard
+  ScraperDashboard:
+    Type: AWS::CloudWatch::Dashboard
+    Properties:
+      DashboardName: instagram-scraper
+      DashboardBody: !Sub |
+        {
+          "widgets": [
+            {
+              "type": "metric",
+              "properties": {
+                "metrics": [
+                  [ "InstagramScraper", "SuccessfulScrapes", { "stat": "Sum" } ],
+                  [ ".", "FailedScrapes", { "stat": "Sum" } ],
+                  [ ".", "RateLimitedCount", { "stat": "Sum" } ],
+                  [ ".", "ExecutionDuration", { "stat": "Average" } ]
+                ],
+                "period": 300,
+                "stat": "Average",
+                "region": "${AWS::Region}",
+                "title": "Scraper Metrics"
+              }
+            },
+            {
+              "type": "log",
+              "properties": {
+                "query": "fields @timestamp, @message | filter @message like /ERROR/ | stats count() by @message",
+                "region": "${AWS::Region}",
+                "title": "Error Summary",
+                "queryId": "errors"
+              }
+            }
+          ]
+        }
+
+  # CloudWatch Alarm for failures
+  HighFailureRateAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: instagram-scraper-high-failure-rate
+      AlarmDescription: Alert when scraper failure rate exceeds 30%
+      MetricName: FailedScrapes
+      Namespace: InstagramScraper
+      Statistic: Sum
+      Period: 3600
+      EvaluationPeriods: 1
+      Threshold: 30
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+
+  # CloudWatch Alarm for rate limiting
+  RateLimitAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: instagram-scraper-rate-limited
+      AlarmDescription: Alert when rate limiting occurs
+      MetricName: RateLimitedCount
+      Namespace: InstagramScraper
+      Statistic: Sum
+      Period: 3600
+      EvaluationPeriods: 1
+      Threshold: 5
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+
+Conditions:
+  HasInstagramSecret: !Not
+    - !Equals
+      - !Ref InstagramAccountsSecretArn
+      - ''
+
+Outputs:
+  ScraperFunctionArn:
+    Description: ARN of the Lambda scraper function
+    Value: !GetAtt ScraperFunction.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-ScraperArn'
+
+  ScraperFunctionName:
+    Description: Name of the Lambda scraper function
+    Value: !Ref ScraperFunction
+    Export:
+      Name: !Sub '${AWS::StackName}-ScraperName'
+
+  DynamoDBTableName:
+    Description: Name of the DynamoDB table
+    Value: !Ref DynamoDBTableName
+    Export:
+      Name: !Sub '${AWS::StackName}-TableName'
+
+  DynamoDBTableArn:
+    Description: ARN of the DynamoDB table
+    Value: !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${DynamoDBTableName}'
+    Export:
+      Name: !Sub '${AWS::StackName}-TableArn'
+
+  LogGroupName:
+    Description: CloudWatch Log Group for scraper
+    Value: !Ref ScraperLogGroup
+    Export:
+      Name: !Sub '${AWS::StackName}-LogGroup'
+
+  DashboardUrl:
+    Description: CloudWatch Dashboard URL
+    Value: !Sub 'https://console.aws.amazon.com/cloudwatch/home?region=${AWS::Region}#dashboards:name=instagram-scraper'

@@ -1,0 +1,35 @@
+# Development and Testing Dependencies
+
+# Core (from requirements.txt)
+instaloader==4.14.2
+boto3==1.28.0
+
+# Testing frameworks
+pytest==7.4.3
+pytest-cov==4.1.0
+pytest-mock==3.12.0
+moto==4.2.9  # AWS service mocking
+
+# Local AWS development
+aws-sam-cli==1.105.0
+localstack==2.3.1  # For local AWS services
+
+# Docker (required for localstack and DynamoDB local)
+# docker>=20.10.0
+# docker-compose>=1.29.0
+
+# Mocking and test utilities
+responses==0.24.1  # Mock HTTP requests
+faker==20.1.0  # Generate fake data
+
+# Code quality
+black==23.12.1
+flake8==6.1.0
+isort==5.13.2
+mypy==1.7.1
+
+# Performance testing
+locust==2.19.0
+
+# Logging and debugging
+python-json-logger==2.0.7
