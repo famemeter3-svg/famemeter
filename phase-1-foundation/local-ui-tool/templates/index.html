@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Celebrity Database Viewer - DynamoDB</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="excel-mode">
+    <div class="spreadsheet-wrapper">
+        <!-- Ribbon/Toolbar -->
+        <div class="ribbon">
+            <div class="ribbon-section">
+                <span class="ribbon-label">Celebrity Database</span>
+            </div>
+            <div class="ribbon-status" id="connectionStatus">
+                <span class="status-indicator disconnected"></span>
+                <span class="status-text">Checking connection...</span>
+            </div>
+        </div>
+
+        <!-- Spreadsheet Navigation -->
+        <div class="sheet-tabs-container">
+            <div class="sheet-tabs">
+                <button class="sheet-tab active" data-tab="overview">📊 Dashboard</button>
+                <button class="sheet-tab" data-tab="celebrities">📋 Data</button>
+                <button class="sheet-tab" data-tab="validation">✓ Validation</button>
+                <button class="sheet-tab" data-tab="schema">⚙️ Schema</button>
+            </div>
+            <div class="sheet-actions">
+                <button class="btn-icon" title="Refresh"><span>↻</span></button>
+                <button class="btn-icon" title="Export"><span>⬇</span></button>
+            </div>
+        </div>
+
+        <div class="spreadsheet-content">
+            <!-- TAB: Dashboard -->
+            <div id="overview" class="sheet-content active">
+                <div class="dashboard-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-label">Total Records</div>
+                        <div class="kpi-value" id="kpiTotal">0</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Celebrities</div>
+                        <div class="kpi-value" id="kpiCelebrities">0</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Metadata</div>
+                        <div class="kpi-value" id="kpiMetadata">0</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Scraper Data</div>
+                        <div class="kpi-value" id="kpiScrapers">0</div>
+                    </div>
+                </div>
+
+                <div class="source-stats">
+                    <h3>Data Sources Summary</h3>
+                    <div class="stats-table-wrapper">
+                        <table class="mini-table" id="sourcesTable">
+                            <thead>
+                                <tr>
+                                    <th>Source</th>
+                                    <th>Count</th>
+                                    <th>Percentage</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sourcesBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="status-section">
+                    <h3>Database Status</h3>
+                    <div id="connectionDetails"></div>
+                </div>
+            </div>
+
+            <!-- TAB: Data (Celebrities) -->
+            <div id="celebrities" class="sheet-content">
+                <div class="data-controls">
+                    <div class="control-group">
+                        <input type="search" id="searchInput" placeholder="🔍 Search by name, ID..." class="search-box">
+                        <button class="btn-secondary" id="filterBtn">⚙️ Filter</button>
+                    </div>
+                    <div class="control-group">
+                        <button class="btn-secondary" id="sortBtn">↕️ Sort</button>
+                        <button class="btn-secondary" id="refreshBtn">↻ Refresh</button>
+                        <button class="btn-secondary" id="exportBtn">⬇ Export</button>
+                    </div>
+                </div>
+
+                <div class="grid-wrapper">
+                    <table class="grid-table" id="celebritiesTable">
+                        <thead>
+                            <tr>
+                                <th class="col-id">ID</th>
+                                <th class="col-name">Name</th>
+                                <th class="col-nationality">Nationality</th>
+                                <th class="col-date">Birth Date</th>
+                                <th class="col-sources">Sources</th>
+                                <th class="col-action">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="celebritiesBody">
+                            <tr><td colspan="6" class="loading-state"><div class="loading-spinner"></div></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="grid-footer">
+                    <span id="recordCount">0 records</span>
+                    <div class="pagination">
+                        <button class="page-btn">&lt;</button>
+                        <span class="page-info">Page <span id="currentPage">1</span> of <span id="totalPages">1</span></span>
+                        <button class="page-btn">&gt;</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: Validation -->
+            <div id="validation" class="sheet-content">
+                <div class="validation-controls">
+                    <button class="btn-primary" id="validateAllBtn">✓ Validate All Data</button>
+                    <span class="validation-info">Check all celebrities for data integrity</span>
+                </div>
+
+                <div class="validation-results-wrapper">
+                    <table class="validation-table" id="validationTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Status</th>
+                                <th>Entries</th>
+                                <th>Issues</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="validationBody">
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="validationResults"></div>
+            </div>
+
+            <!-- TAB: Schema -->
+            <div id="schema" class="sheet-content">
+                <div class="schema-container">
+                    <h3>Table Configuration</h3>
+                    <div class="schema-grid">
+                        <div id="schemaInfo"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Celebrity Details -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close">&times;</button>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

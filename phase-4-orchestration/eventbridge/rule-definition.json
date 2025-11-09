@@ -1,0 +1,56 @@
+{
+  "Name": "celebrity-weekly-scrape",
+  "Description": "Weekly trigger for celebrity data scrapers",
+  "ScheduleExpression": "cron(0 2 ? * SUN *)",
+  "State": "DISABLED",
+  "Targets": [
+    {
+      "Id": "target-scraper-tmdb",
+      "Arn": "arn:aws:lambda:us-east-1:ACCOUNT_ID:function:scraper-tmdb",
+      "RoleArn": "arn:aws:iam::ACCOUNT_ID:role/eventbridge-invoke-lambda",
+      "RetryPolicy": {
+        "MaximumEventAge": 300,
+        "MaximumRetryAttempts": 3
+      },
+      "DeadLetterConfig": {
+        "Arn": "arn:aws:sqs:us-east-1:ACCOUNT_ID:celebrity-scraper-dlq"
+      }
+    },
+    {
+      "Id": "target-scraper-wikipedia",
+      "Arn": "arn:aws:lambda:us-east-1:ACCOUNT_ID:function:scraper-wikipedia",
+      "RoleArn": "arn:aws:iam::ACCOUNT_ID:role/eventbridge-invoke-lambda",
+      "RetryPolicy": {
+        "MaximumEventAge": 300,
+        "MaximumRetryAttempts": 3
+      },
+      "DeadLetterConfig": {
+        "Arn": "arn:aws:sqs:us-east-1:ACCOUNT_ID:celebrity-scraper-dlq"
+      }
+    },
+    {
+      "Id": "target-scraper-news",
+      "Arn": "arn:aws:lambda:us-east-1:ACCOUNT_ID:function:scraper-news",
+      "RoleArn": "arn:aws:iam::ACCOUNT_ID:role/eventbridge-invoke-lambda",
+      "RetryPolicy": {
+        "MaximumEventAge": 300,
+        "MaximumRetryAttempts": 3
+      },
+      "DeadLetterConfig": {
+        "Arn": "arn:aws:sqs:us-east-1:ACCOUNT_ID:celebrity-scraper-dlq"
+      }
+    },
+    {
+      "Id": "target-scraper-social",
+      "Arn": "arn:aws:lambda:us-east-1:ACCOUNT_ID:function:scraper-social",
+      "RoleArn": "arn:aws:iam::ACCOUNT_ID:role/eventbridge-invoke-lambda",
+      "RetryPolicy": {
+        "MaximumEventAge": 300,
+        "MaximumRetryAttempts": 3
+      },
+      "DeadLetterConfig": {
+        "Arn": "arn:aws:sqs:us-east-1:ACCOUNT_ID:celebrity-scraper-dlq"
+      }
+    }
+  ]
+}
