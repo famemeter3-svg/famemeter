@@ -1,0 +1,272 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Description: 'Stage 2.3: Threads Scraper - Account-Based Profile Data Collection'
+
+Globals:
+  Function:
+    Runtime: python3.13
+    Timeout: 600  # 10 minutes
+    MemorySize: 1024
+    Environment:
+      Variables:
+        LOG_LEVEL: !Ref LogLevel
+        INSTAGRAM_TIMEOUT: !Ref InstagramTimeout
+        DYNAMODB_TABLE: !Ref DynamoDBTableName
+        INSTAGRAM_ACCOUNTS_SECRET_ARN: !Ref InstagramAccountsSecretArn
+        PROXY_LIST_SECRET_ARN: !Ref ProxyListSecretArn
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - staging
+      - prod
+    Description: Deployment environment
+
+  LogLevel:
+    Type: String
+    Default: INFO
+    AllowedValues:
+      - DEBUG
+      - INFO
+      - WARNING
+      - ERROR
+    Description: Lambda function log level
+
+  InstagramTimeout:
+    Type: Number
+    Default: 20
+    MinValue: 10
+    MaxValue: 60
+    Description: Request timeout in seconds
+
+  DynamoDBTableName:
+    Type: String
+    Default: celebrity-database
+    Description: DynamoDB table name for storing celebrity data
+
+  InstagramAccountsSecretArn:
+    Type: String
+    Description: ARN of Secrets Manager secret containing Instagram accounts
+
+  ProxyListSecretArn:
+    Type: String
+    Description: ARN of Secrets Manager secret containing proxy list
+
+  EventBridgeScheduleExpression:
+    Type: String
+    Default: 'cron(0 2 ? * 2 *)'  # Weekly Monday 2 AM UTC
+    Description: EventBridge schedule expression for triggering scraper
+
+Resources:
+  # Lambda Function
+  ThreadsScraperFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'scraper-threads-${Environment}'
+      CodeUri: .
+      Handler: lambda_function.lambda_handler
+      Description: Scrapes Threads profile data using account credentials and proxy rotation
+      Architectures:
+        - x86_64
+      Environment:
+        Variables:
+          ENVIRONMENT: !Ref Environment
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DynamoDBTableName
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - secretsmanager:GetSecretValue
+              Resource:
+                - !Ref InstagramAccountsSecretArn
+                - !Ref ProxyListSecretArn
+            - Effect: Allow
+              Action:
+                - cloudwatch:PutMetricData
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - logs:CreateLogGroup
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+              Resource: 'arn:aws:logs:*:*:*'
+      LoggingConfig:
+        LogFormat: JSON
+      Layers:
+        - !Ref DependenciesLayer
+      Tags:
+        Environment: !Ref Environment
+        Service: Scraper
+        Component: Threads
+
+  # Lambda Layer for dependencies
+  DependenciesLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: !Sub 'scraper-threads-dependencies-${Environment}'
+      Description: Python dependencies for Threads scraper
+      ContentUri: .
+      CompatibleRuntimes:
+        - python3.13
+
+  # CloudWatch Log Group
+  ThreadsScraperLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/scraper-threads-${Environment}'
+      RetentionInDays: 30
+
+  # EventBridge Rule for scheduled execution
+  ThreadsScraperScheduleRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: !Sub 'scraper-threads-schedule-${Environment}'
+      Description: Scheduled trigger for Threads scraper
+      ScheduleExpression: !Ref EventBridgeScheduleExpression
+      State: ENABLED
+      Targets:
+        - Arn: !GetAtt ThreadsScraperFunction.Arn
+          Id: ThreadsScraperTarget
+          RoleArn: !GetAtt EventBridgeRole.Arn
+
+  # IAM Role for EventBridge
+  EventBridgeRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: events.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: InvokeLambda
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                Resource: !GetAtt ThreadsScraperFunction.Arn
+
+  # Lambda permission for EventBridge
+  ThreadsScraperInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref ThreadsScraperFunction
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt ThreadsScraperScheduleRule.Arn
+
+  # CloudWatch Dashboard
+  ThreadsScraperDashboard:
+    Type: AWS::CloudWatch::Dashboard
+    Properties:
+      DashboardName: !Sub 'scraper-threads-${Environment}'
+      DashboardBody: !Sub |
+        {
+          "widgets": [
+            {
+              "type": "metric",
+              "properties": {
+                "metrics": [
+                  [ "ThreadsScraper", "SuccessfulScrapes", { "stat": "Sum" } ],
+                  [ ".", "FailedScrapes", { "stat": "Sum" } ],
+                  [ ".", "RateLimitedAttempts", { "stat": "Sum" } ],
+                  [ ".", "RetryCount", { "stat": "Sum" } ],
+                  [ ".", "ExecutionDuration", { "stat": "Average" } ]
+                ],
+                "period": 300,
+                "stat": "Average",
+                "region": "${AWS::Region}",
+                "title": "Threads Scraper Metrics"
+              }
+            },
+            {
+              "type": "log",
+              "properties": {
+                "query": "fields @timestamp, @message | filter @message like /ERROR/ | stats count() as error_count",
+                "region": "${AWS::Region}",
+                "title": "Error Count (Last Hour)",
+                "queryId": "logs-insights-errors"
+              }
+            }
+          ]
+        }
+
+  # CloudWatch Alarm - High Error Rate
+  ErrorRateAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub 'scraper-threads-high-error-rate-${Environment}'
+      AlarmDescription: Alert when Threads scraper has high error rate
+      MetricName: FailedScrapes
+      Namespace: ThreadsScraper
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 20
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+      AlarmActions:
+        - !Sub 'arn:aws:sns:${AWS::Region}:${AWS::AccountId}:scraper-alerts'
+
+  # CloudWatch Alarm - Rate Limiting
+  RateLimitAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub 'scraper-threads-rate-limit-${Environment}'
+      AlarmDescription: Alert when Threads scraper encounters rate limiting
+      MetricName: RateLimitedAttempts
+      Namespace: ThreadsScraper
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 10
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+      AlarmActions:
+        - !Sub 'arn:aws:sns:${AWS::Region}:${AWS::AccountId}:scraper-alerts'
+
+  # SNS Topic for Alerts
+  AlertsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub 'scraper-alerts-${Environment}'
+      DisplayName: Scraper Alerts
+
+Outputs:
+  ThreadsScraperFunctionArn:
+    Description: ARN of the Threads Scraper Lambda function
+    Value: !GetAtt ThreadsScraperFunction.Arn
+    Export:
+      Name: !Sub 'ThreadsScraperFunction-${Environment}'
+
+  ThreadsScraperFunctionName:
+    Description: Name of the Threads Scraper Lambda function
+    Value: !Ref ThreadsScraperFunction
+    Export:
+      Name: !Sub 'ThreadsScraperFunctionName-${Environment}'
+
+  LogGroupName:
+    Description: CloudWatch Log Group for Threads Scraper
+    Value: !Ref ThreadsScraperLogGroup
+    Export:
+      Name: !Sub 'ThreadsScraperLogGroup-${Environment}'
+
+  DashboardURL:
+    Description: CloudWatch Dashboard URL
+    Value: !Sub 'https://console.aws.amazon.com/cloudwatch/home?region=${AWS::Region}#dashboards:name=scraper-threads-${Environment}'
+
+  EventBridgeRuleArn:
+    Description: ARN of EventBridge schedule rule
+    Value: !GetAtt ThreadsScraperScheduleRule.Arn
+    Export:
+      Name: !Sub 'ThreadsScraperScheduleRule-${Environment}'

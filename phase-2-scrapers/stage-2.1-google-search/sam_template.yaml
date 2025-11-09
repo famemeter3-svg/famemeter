@@ -1,0 +1,265 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Description: 'Stage 2.1: Google Search Scraper - Celebrity Search Results with API Key Rotation'
+
+Globals:
+  Function:
+    Runtime: python3.13
+    Timeout: 600  # 10 minutes
+    MemorySize: 1024
+    Environment:
+      Variables:
+        LOG_LEVEL: !Ref LogLevel
+        DYNAMODB_TABLE: !Ref DynamoDBTableName
+        GOOGLE_API_KEYS_SECRET_ARN: !Ref GoogleAPIKeysSecretArn
+        ENABLE_KEY_ROTATION: !Ref EnableKeyRotation
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - staging
+      - prod
+    Description: Deployment environment
+
+  LogLevel:
+    Type: String
+    Default: INFO
+    AllowedValues:
+      - DEBUG
+      - INFO
+      - WARNING
+      - ERROR
+    Description: Lambda function log level
+
+  DynamoDBTableName:
+    Type: String
+    Default: celebrity-database
+    Description: DynamoDB table name for storing celebrity data
+
+  GoogleAPIKeysSecretArn:
+    Type: String
+    Description: ARN of Secrets Manager secret containing Google API keys
+
+  EnableKeyRotation:
+    Type: String
+    Default: 'true'
+    AllowedValues:
+      - 'true'
+      - 'false'
+    Description: Enable API key rotation strategy
+
+  EventBridgeScheduleExpression:
+    Type: String
+    Default: 'cron(0 3 ? * 3 *)'  # Weekly Wednesday 3 AM UTC
+    Description: EventBridge schedule expression for triggering scraper
+
+Resources:
+  # Lambda Function
+  GoogleSearchScraperFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'scraper-google-search-${Environment}'
+      CodeUri: .
+      Handler: lambda_function.lambda_handler
+      Description: Scrapes Google Search results for celebrities with API key rotation
+      Architectures:
+        - x86_64
+      Environment:
+        Variables:
+          ENVIRONMENT: !Ref Environment
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DynamoDBTableName
+        - Statement:
+            - Effect: Allow
+              Action:
+                - secretsmanager:GetSecretValue
+              Resource: !Ref GoogleAPIKeysSecretArn
+            - Effect: Allow
+              Action:
+                - cloudwatch:PutMetricData
+              Resource: '*'
+            - Effect: Allow
+              Action:
+                - logs:CreateLogGroup
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+              Resource: 'arn:aws:logs:*:*:*'
+      LoggingConfig:
+        LogFormat: JSON
+      Layers:
+        - !Ref DependenciesLayer
+      Tags:
+        Environment: !Ref Environment
+        Service: Scraper
+        Component: GoogleSearch
+
+  # Lambda Layer for dependencies
+  DependenciesLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: !Sub 'scraper-google-search-dependencies-${Environment}'
+      Description: Python dependencies for Google Search scraper
+      ContentUri: .
+      CompatibleRuntimes:
+        - python3.13
+
+  # CloudWatch Log Group
+  GoogleSearchScraperLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/scraper-google-search-${Environment}'
+      RetentionInDays: 30
+
+  # EventBridge Rule for scheduled execution
+  GoogleSearchScraperScheduleRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: !Sub 'scraper-google-search-schedule-${Environment}'
+      Description: Scheduled trigger for Google Search scraper
+      ScheduleExpression: !Ref EventBridgeScheduleExpression
+      State: ENABLED
+      Targets:
+        - Arn: !GetAtt GoogleSearchScraperFunction.Arn
+          Id: GoogleSearchScraperTarget
+          RoleArn: !GetAtt EventBridgeRole.Arn
+
+  # IAM Role for EventBridge
+  EventBridgeRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: events.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: InvokeLambda
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                Resource: !GetAtt GoogleSearchScraperFunction.Arn
+
+  # Lambda permission for EventBridge
+  GoogleSearchScraperInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref GoogleSearchScraperFunction
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt GoogleSearchScraperScheduleRule.Arn
+
+  # CloudWatch Dashboard
+  GoogleSearchScraperDashboard:
+    Type: AWS::CloudWatch::Dashboard
+    Properties:
+      DashboardName: !Sub 'scraper-google-search-${Environment}'
+      DashboardBody: !Sub |
+        {
+          "widgets": [
+            {
+              "type": "metric",
+              "properties": {
+                "metrics": [
+                  [ "GoogleSearchScraper", "SuccessfulScrapes", { "stat": "Sum" } ],
+                  [ ".", "FailedScrapes", { "stat": "Sum" } ],
+                  [ ".", "APIKeyRotations", { "stat": "Sum" } ],
+                  [ ".", "RetryCount", { "stat": "Sum" } ],
+                  [ ".", "ExecutionDuration", { "stat": "Average" } ]
+                ],
+                "period": 300,
+                "stat": "Average",
+                "region": "${AWS::Region}",
+                "title": "Google Search Scraper Metrics"
+              }
+            },
+            {
+              "type": "log",
+              "properties": {
+                "query": "fields @timestamp, @message | filter @message like /ERROR/ | stats count() as error_count",
+                "region": "${AWS::Region}",
+                "title": "Error Count (Last Hour)",
+                "queryId": "logs-insights-errors"
+              }
+            }
+          ]
+        }
+
+  # CloudWatch Alarm - High Error Rate
+  ErrorRateAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub 'scraper-google-search-high-error-rate-${Environment}'
+      AlarmDescription: Alert when Google Search scraper has high error rate
+      MetricName: FailedScrapes
+      Namespace: GoogleSearchScraper
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 20
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+      AlarmActions:
+        - !Sub 'arn:aws:sns:${AWS::Region}:${AWS::AccountId}:scraper-alerts'
+
+  # CloudWatch Alarm - API Key Quota
+  APIKeyQuotaAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub 'scraper-google-search-api-quota-${Environment}'
+      AlarmDescription: Alert when excessive API key rotations detected
+      MetricName: APIKeyRotations
+      Namespace: GoogleSearchScraper
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 15
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+      AlarmActions:
+        - !Sub 'arn:aws:sns:${AWS::Region}:${AWS::AccountId}:scraper-alerts'
+
+  # SNS Topic for Alerts
+  AlertsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub 'scraper-alerts-${Environment}'
+      DisplayName: Scraper Alerts
+
+Outputs:
+  GoogleSearchScraperFunctionArn:
+    Description: ARN of the Google Search Scraper Lambda function
+    Value: !GetAtt GoogleSearchScraperFunction.Arn
+    Export:
+      Name: !Sub 'GoogleSearchScraperFunction-${Environment}'
+
+  GoogleSearchScraperFunctionName:
+    Description: Name of the Google Search Scraper Lambda function
+    Value: !Ref GoogleSearchScraperFunction
+    Export:
+      Name: !Sub 'GoogleSearchScraperFunctionName-${Environment}'
+
+  LogGroupName:
+    Description: CloudWatch Log Group for Google Search Scraper
+    Value: !Ref GoogleSearchScraperLogGroup
+    Export:
+      Name: !Sub 'GoogleSearchScraperLogGroup-${Environment}'
+
+  DashboardURL:
+    Description: CloudWatch Dashboard URL
+    Value: !Sub 'https://console.aws.amazon.com/cloudwatch/home?region=${AWS::Region}#dashboards:name=scraper-google-search-${Environment}'
+
+  EventBridgeRuleArn:
+    Description: ARN of EventBridge schedule rule
+    Value: !GetAtt GoogleSearchScraperScheduleRule.Arn
+    Export:
+      Name: !Sub 'GoogleSearchScraperScheduleRule-${Environment}'
