@@ -98,94 +98,9 @@ Sort Key: source_type#timestamp
 
 ## Complete Data Structure
 
-### Scraper Entry (created by Phase 2)
-This is the PRIMARY data structure that gets stored in DynamoDB. Each scraper creates entries following this schema:
+### Master Record (Created by Phase 1)
 
-```json
-{
-  "celebrity_id": "celeb_001",
-  "source_type#timestamp": "tmdb#2025-11-07T17:20:00Z",
-  "id": "scraper_entry_001_tmdb_2025_11_07",
-  "name": "Leonardo DiCaprio",
-  "raw_text": "{...complete API response or HTML...}",
-  "source": "https://api.themoviedb.org/3/person/search",
-  "timestamp": "2025-11-07T17:20:00Z",
-  "weight": 0.85,
-  "sentiment": "neutral",
-  "metadata": {
-    "scraper_name": "scraper-tmdb",
-    "source_type": "tmdb",
-    "processed": true,
-    "error": null
-  }
-}
-```
-
-### Field Definitions
-
-| Field | Type | When Set | Description | Example |
-|-------|------|----------|-------------|---------|
-| `celebrity_id` | String | During Scrape | Partition key - groups all data for one celebrity | `celeb_001` |
-| `source_type#timestamp` | String | During Scrape | Sort key - source type + ISO8601 timestamp | `tmdb#2025-11-07T17:20:00Z` |
-| `id` | String | During Scrape | Unique identifier per scraper entry | `scraper_entry_001_tmdb_2025_11_07` |
-| `name` | String | During Scrape | Celebrity name from source (first-hand) | `Leonardo DiCaprio` |
-| `raw_text` | String | During Scrape | Raw HTML/JSON response from API (entire response stored) | `{...full API response...}` |
-| `source` | String | During Scrape | Source URL where data originated | `https://api.themoviedb.org/3/person/search` |
-| `timestamp` | ISO8601 | During Scrape | When data was scraped (first-hand) | `2025-11-07T17:20:00Z` |
-| `weight` | Float 0-1 | Post-Processing | Confidence score (computed in Phase 3) | `0.85` |
-| `sentiment` | String | Post-Processing | Sentiment classification (computed in Phase 3) | `positive`, `negative`, `neutral` |
-
-### Data Flow Pattern
-
-```
-┌─────────────────────────────────────────┐
-│     FIRST-HAND (During Scrape)         │
-├─────────────────────────────────────────┤
-│ ✓ id                                    │
-│ ✓ name                                  │
-│ ✓ raw_text (entire API response)        │
-│ ✓ source                                │
-│ ✓ timestamp                             │
-│ ✓ metadata.scraper_name                 │
-│ ✓ metadata.source_type                  │
-└─────────────────────────────────────────┘
-           │
-           │ Phase 2: Scraper writes to DynamoDB
-           │
-           ▼
-┌─────────────────────────────────────────┐
-│  Stored in DynamoDB (waiting)           │
-├─────────────────────────────────────────┤
-│ weight: null (will be computed)         │
-│ sentiment: null (will be computed)      │
-└─────────────────────────────────────────┘
-           │
-           │ DynamoDB Stream triggers
-           │ Phase 3: Post-Processor reads entry
-           │
-           ▼
-┌─────────────────────────────────────────┐
-│    COMPUTED (Post-Processing)           │
-├─────────────────────────────────────────┤
-│ ✓ weight (via scoring algorithm)        │
-│ ✓ sentiment (via NLP/sentiment analysis)│
-│ ✓ metadata.processed = true             │
-└─────────────────────────────────────────┘
-           │
-           │ Phase 3: Post-Processor updates DynamoDB
-           │
-           ▼
-┌─────────────────────────────────────────┐
-│  Complete Entry (Ready for API/Frontend)│
-├─────────────────────────────────────────┤
-│ All first-hand fields: ✓                │
-│ All computed fields: ✓                  │
-│ Ready for display in Phase 6 Frontend   │
-└─────────────────────────────────────────┘
-```
-
-### Master Record (Seed Data Only - Phase 1)
-The initial celebrity master list is used ONLY for seeding. Once scraped, all data comes from scraper entries above.
+**This is what Phase 1 creates during celebrity seeding.** Each celebrity gets ONE master record with basic metadata.
 
 ```json
 {
@@ -201,7 +116,129 @@ The initial celebrity master list is used ONLY for seeding. Once scraped, all da
 }
 ```
 
-**Note**: Master records have fixed `source_type#timestamp` of `metadata#2025-01-01T00:00:00Z` to distinguish them from scraper entries
+**Characteristics of Master Records**:
+- **One per celebrity** - created during Phase 1 seeding
+- **Fixed timestamp** - `source_type#timestamp` = `metadata#2025-01-01T00:00:00Z` (always the same)
+- **Basic metadata only** - name, birth_date, nationality, occupation
+- **NO raw_text field** - that's Phase 2's responsibility
+- **NO weight/sentiment** - those are Phase 3's responsibility
+- **Ready for Phase 2** - masters are referenced by scrapers to add data sources
+
+### Scraper Entry (Created by Phase 2)
+
+**This is what Phase 2 creates when running scrapers.** Each data source creates MULTIPLE entries per celebrity with detailed information.
+
+```json
+{
+  "celebrity_id": "celeb_001",
+  "source_type#timestamp": "google_search#2025-11-07T17:20:00Z",
+  "id": "scraper_entry_001_google_2025_11_07",
+  "name": "Leonardo DiCaprio",
+  "raw_text": "{...complete unprocessed API response or HTML...}",
+  "source": "https://www.google.com/search",
+  "timestamp": "2025-11-07T17:20:00Z",
+  "weight": null,
+  "sentiment": null,
+  "metadata": {
+    "scraper_name": "scraper-google",
+    "source_type": "google_search",
+    "processed": false,
+    "error": null
+  }
+}
+```
+
+**Characteristics of Scraper Entries**:
+- **Multiple per celebrity** - one entry per data source
+- **Dynamic timestamp** - `source_type#timestamp` = `{source}#{ISO8601_timestamp}` (changes each scrape)
+- **Complete raw data** - includes entire unprocessed API response or HTML
+- **First-hand fields** - id, name, raw_text, source, timestamp (directly from source)
+- **Null computed fields** - weight and sentiment are null (will be computed by Phase 3)
+- **Ready for Phase 3** - DynamoDB Streams triggers post-processor to add weight & sentiment
+
+### Field Definitions
+
+| Field | Type | Set By | Description | Example |
+|-------|------|--------|-------------|---------|
+| `celebrity_id` | String | Phase 1 | Partition key - groups all data for one celebrity | `celeb_001` |
+| `source_type#timestamp` | String | Phase 1 & 2 | Sort key - metadata marker or source#timestamp | `metadata#2025-01-01T00:00:00Z` or `google_search#2025-11-07T17:20:00Z` |
+| `name` | String | Phase 1 & 2 | Celebrity name (from master or source) | `Leonardo DiCaprio` |
+| `birth_date` | String | Phase 1 | Birth date (MASTER RECORDS ONLY) | `1974-11-11` |
+| `nationality` | String | Phase 1 | Nationality (MASTER RECORDS ONLY) | `American` |
+| `occupation` | Array | Phase 1 | Career fields (MASTER RECORDS ONLY) | `["Actor", "Producer"]` |
+| `is_active` | Boolean | Phase 1 | Active status (MASTER RECORDS ONLY) | `true` |
+| `id` | String | Phase 2 | Unique identifier per scraper entry | `scraper_entry_001_google_2025_11_07` |
+| `raw_text` | String | Phase 2 | Raw HTML/JSON response from API (entire response stored) | `{...full API response...}` |
+| `source` | String | Phase 2 | Source URL where data originated | `https://www.google.com/search` |
+| `timestamp` | ISO8601 | Phase 2 | When data was scraped (first-hand) | `2025-11-07T17:20:00Z` |
+| `weight` | Float 0-1 | Phase 3 | Confidence score (computed from raw_text) | `0.85` |
+| `sentiment` | String | Phase 3 | Sentiment classification (positive/negative/neutral) | `positive` |
+
+### Data Flow Pattern - Phase 1 (Master Records)
+
+```
+┌─────────────────────────────────────────┐
+│  Phase 1: MASTER RECORDS ONLY           │
+├─────────────────────────────────────────┤
+│ ✓ celebrity_id                          │
+│ ✓ name                                  │
+│ ✓ birth_date                            │
+│ ✓ nationality                           │
+│ ✓ occupation                            │
+│ ✓ is_active                             │
+│ ✗ NO raw_text (Phase 2 adds this)       │
+│ ✗ NO weight (Phase 3 computes this)     │
+│ ✗ NO sentiment (Phase 3 computes this)  │
+└─────────────────────────────────────────┘
+         │
+         │ Phase 1: seed-database.py creates master records
+         │ Each: source_type#timestamp = "metadata#2025-01-01T00:00:00Z"
+         │
+         ▼
+┌─────────────────────────────────────────┐
+│ Stored in DynamoDB (Waiting for Phase 2)│
+├─────────────────────────────────────────┤
+│ ✓ Master records ready for lookup       │
+│ ✓ Indexes ready for queries             │
+│ ✓ Streams ready to receive Phase 2 data │
+└─────────────────────────────────────────┘
+         │
+         │ Phase 2: Scrapers create entries with raw_text
+         │ Each: source_type#timestamp = "{source}#{timestamp}"
+         │
+         ▼
+┌─────────────────────────────────────────┐
+│   Phase 2: SCRAPER ENTRIES ADDED        │
+├─────────────────────────────────────────┤
+│ ✓ All master fields: id, name, source   │
+│ ✓ raw_text (complete unprocessed data)  │
+│ ✓ timestamp (when data was collected)   │
+│ ✗ weight = null (waiting for Phase 3)   │
+│ ✗ sentiment = null (waiting for Phase 3)│
+└─────────────────────────────────────────┘
+         │
+         │ DynamoDB Streams triggers Phase 3 Post-Processor
+         │
+         ▼
+┌─────────────────────────────────────────┐
+│ Phase 3: WEIGHT & SENTIMENT COMPUTED    │
+├─────────────────────────────────────────┤
+│ ✓ weight (confidence score 0-1)         │
+│ ✓ sentiment (positive/negative/neutral) │
+│ ✓ metadata.processed = true             │
+└─────────────────────────────────────────┘
+         │
+         │ Complete data ready for API & Frontend
+         │
+         ▼
+┌─────────────────────────────────────────┐
+│ Phase 5 & 6: API & Frontend Display     │
+├─────────────────────────────────────────┤
+│ Master: name, birth_date, nationality   │
+│ Sources: raw_text from each scraper     │
+│ Scores: weight & sentiment from Phase 3 │
+└─────────────────────────────────────────┘
+```
 
 ## Key Features
 
